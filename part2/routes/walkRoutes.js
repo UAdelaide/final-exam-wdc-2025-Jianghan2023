@@ -19,6 +19,31 @@ router.get('/', async (req, res) => {
   }
 })
 
+// Get all walk requests (for owners to view)
+router.get('/my', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ error: 'Unauthorized' })
+    }
+    const userId = req.session.user.user_id
+
+    const [rows] = await db.query(
+      `
+      SELECT wr.*, d.name AS dog_name, d.size, u.username AS owner_name
+      FROM WalkRequests wr
+      JOIN Dogs d ON wr.dog_id = d.dog_id
+      JOIN Users u ON d.owner_id = u.user_id
+      WHERE wr.status = 'open' AND d.owner_id = ?
+    `,
+      [userId]
+    )
+    res.json(rows)
+  } catch (error) {
+    console.error('SQL Error:', error)
+    res.status(500).json({ error: 'Failed to fetch walk requests' })
+  }
+})
+
 // POST a new walk request (from owner)
 router.post('/', async (req, res) => {
   const { dog_id, requested_time, duration_minutes, location } = req.body
