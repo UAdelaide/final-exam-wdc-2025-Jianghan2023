@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Walker Dashboard Part 1</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+</head>
+<body>
+    <div id="app">
+      <button @click="showDog">Show Dog</button>
+      <div v-if="isShow">
+        <img :src="image" alt="image">
+        <p>N: {{ name }}</p>
+        <p>S: {{ size }}</p>
+      </div>
+    </div>
+
+<script>
+  const { createApp, ref } = Vue
+
+  createApp({
+    data() {
+      const image = ref('')
+      const name = ref('Max')
+      const size = ref('small')
+      const isShow = ref(false)
+
+      const showDog = () => {
+        isShow.value = true
+      }
+
+      function randomImage() {
+        fetch('https://dog.ceo/api/breeds/image/random')
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success') {
+            image.value = data.message
+          }
+        })
+      }
+
+      onMounted(() => {
+        randomImage()
+      })
+
+      return {
+        image, 
+        name, 
+        size,
+        showDog,
+        isShow
+      }
+    }
+  }).mount('#app')
+</script>
+</body>
+</html>
